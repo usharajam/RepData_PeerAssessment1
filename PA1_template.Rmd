@@ -1,20 +1,97 @@
-# Reproducible Research: Peer Assessment 1
+Title
+========================================================
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring web pages (click the **Help** toolbar button for more details on using R Markdown).
+
+When you click the **Knit HTML** button a web page will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r readdata}
+setwd("C:/Users/Amarnath")
+dfActivity <- read.csv("./activity.csv")
+
+```
+
+Question 1
+-------------
+
+```{r  fig.width=7, fig.height=6}
+stepsByDay <- aggregate(dfActivity$steps, by = list(date = as.Date(dfActivity$date)), sum)
+hist(stepsByDay$x, xlab = "Steps", ylab = "Days", main = "Histogram of steps taken each day")
+mean(stepsByDay$x, na.rm = TRUE)
+median(stepsByDay$x, na.rm = TRUE)
+
+```
+
+Question 2
+----------
 
 
-## Loading and preprocessing the data
+```{r  fig.width=7, fig.height=6}
+dfa_withoutNA <- na.omit(dfActivity)
+meanStepsByInterval <- aggregate(dfa_withoutNA$steps, FUN ="mean", by = list(dfa_withoutNA$interval), na.action = na.omit)
+byInterval <- aggregate(dfa_withoutNA$steps, FUN ="mean", by = list(interval = dfa_withoutNA$interval), na.action = na.omit)
 
+plot(byInterval$interval, 
+     byInterval$x, type = "l", 
+     main = "Average daily Activity Pattern",
+     xlab = "5 Minute Intervals",
+     ylab = "Steps")
+meanStepsByInterval[which.max(meanStepsByInterval$x),1]
 
+```
 
-## What is mean total number of steps taken per day?
+Question 3
+----------
+Calculate the total Number of missing values in the Data Set
+```{r  fig.width=7, fig.height=6}
+  print("Count of Rows that has NAs:")
+  sum(!complete.cases(dfActivity))
 
+````
+Strategy for Replacing NAs. Here NAs in Steps are replaced with Mean steps for each day. Note: if mean is NaN, then it is replaced with 0.
 
+```{r  fig.width=7, fig.height=6}
+## replace NAs
+  require("plyr")
+  impute.mean <- function(x) 
+    {
+     y <- replace(x, is.na(x), mean(x, na.rm = TRUE)) 
+     replace(y, is.nan(y), 0)
+    
+    }
+  dfa_imput <- ddply(dfActivity, ~ date, transform, steps = impute.mean(steps))
 
-## What is the average daily activity pattern?
+````
 
+Now, The NAs are replaced with Mean steps for that day, the histogram of total steps taken each day is plotted.
 
+```{r  fig.width=7, fig.height=6}
+  stepsByDay <- aggregate(dfa_imput$steps, 
+                          by = list(date = as.Date(dfa_imput$date)), sum)
+  hist(stepsByDay$x, xlab = "Steps", ylab = "Days", 
+       main = "Histogram of steps taken each day")
+`````
 
-## Imputing missing values
+The mean and median of total steps taken in all days is listed below
 
+```{r  fig.width=7, fig.height=6}
+  mean(stepsByDay$x, na.rm = TRUE)
+  median(stepsByDay$x, na.rm = TRUE)
+```
+Create a factor variable with "Weekday" and "Weekend" as values and add that column along with data frame for which we imputed values for NA above.
 
+````{r }
+  weekFactor <- sub("Saturday|Sunday", "Weekend", 
+                    weekdays(as.Date(dfa_imput$date)))
+  weekFactor <- replace(weekFactor, grep("Weekend", invert = TRUE, weekFactor), "Weekday")
+  dfa_imput["week"] <- factor(weekFactor)
 
-## Are there differences in activity patterns between weekdays and weekends?
+meanByInterval <- aggregate(dfa_imput$steps, FUN ="mean", by = list(interval = dfa_imput$interval), na.action = na.omit)
+
+plot(meanByInterval$interval, 
+     byInterval$x, type = "l", 
+     main = "Average daily Activity Pattern",
+     xlab = "5 Minute Intervals",
+     ylab = "Steps")
+
+````
