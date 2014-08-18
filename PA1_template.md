@@ -139,18 +139,20 @@ Create a factor variable with "Weekday" and "Weekend" as values and add that col
 
 
 ```r
+  library(lattice)
   weekFactor <- sub("Saturday|Sunday", "Weekend", 
                     weekdays(as.Date(dfa_imput$date)))
-  weekFactor <- replace(weekFactor, grep("Weekend", invert = TRUE, weekFactor), "Weekday")
+  weekFactor <- replace(weekFactor, 
+                        grep("Weekend", invert = TRUE, weekFactor), "Weekday")
   dfa_imput["week"] <- factor(weekFactor)
 
-meanByInterval <- aggregate(dfa_imput$steps, FUN ="mean", by = list(interval = dfa_imput$interval), na.action = na.omit)
+  meanByInterval <- ddply(dfa_imput, 
+                          .(interval, week), 
+                          summarise, 
+                          steps=mean(steps))
 
-plot(meanByInterval$interval, 
-     byInterval$x, type = "l", 
-     main = "Average daily Activity Pattern",
-     xlab = "5 Minute Intervals",
-     ylab = "Steps")
+  xyplot(steps ~ interval | week, 
+         data = meanByInterval, layout = c(1, 2), type="l")
 ```
 
 ![plot of chunk unnamed-chunk-7](figure/unnamed-chunk-7.png) 
