@@ -36,6 +36,7 @@ median(stepsByDay$x, na.rm = TRUE)
 Question 2
 ----------
 
+Calculate Average Daily Activity Pattern
 
 
 ```r
@@ -51,6 +52,9 @@ plot(byInterval$interval,
 ```
 
 ![plot of chunk unnamed-chunk-2](figure/unnamed-chunk-2.png) 
+
+Finding the Interval which has the maximum Steps
+
 
 ```r
 meanStepsByInterval[which.max(meanStepsByInterval$x),1]
@@ -109,19 +113,19 @@ Now, The NAs are replaced with Mean steps for that day, the histogram of total s
 
 
 ```r
-  stepsByDay <- aggregate(dfa_imput$steps, 
+  imputStepsByDay <- aggregate(dfa_imput$steps, 
                           by = list(date = as.Date(dfa_imput$date)), sum)
-  hist(stepsByDay$x, xlab = "Steps", ylab = "Days", 
+  hist(imputStepsByDay$x, xlab = "Steps", ylab = "Days", 
        main = "Histogram of steps taken each day")
 ```
 
-![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5.png) 
+![plot of chunk unnamed-chunk-6](figure/unnamed-chunk-6.png) 
 
 The mean and median of total steps taken in all days is listed below
 
 
 ```r
-  mean(stepsByDay$x, na.rm = TRUE)
+  mean(imputStepsByDay$x)
 ```
 
 ```
@@ -129,12 +133,18 @@ The mean and median of total steps taken in all days is listed below
 ```
 
 ```r
-  median(stepsByDay$x, na.rm = TRUE)
+  median(imputStepsByDay$x)
 ```
 
 ```
 ## [1] 10395
 ```
+
+Mean values changed because I supplied average steps for the corresponding day. Looking at the data there is a day where we got NAs  for all the intervals. So in that case I supplied 0. So, the mean, median and  Histogram are changed somewhat.
+
+Question 4
+----------
+
 Create a factor variable with "Weekday" and "Weekend" as values and add that column along with data frame for which we imputed values for NA above.
 
 
@@ -155,4 +165,4 @@ Create a factor variable with "Weekday" and "Weekend" as values and add that col
          data = meanByInterval, layout = c(1, 2), type="l")
 ```
 
-![plot of chunk unnamed-chunk-7](figure/unnamed-chunk-7.png) 
+![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8.png) 
